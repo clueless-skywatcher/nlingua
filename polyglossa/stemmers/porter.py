@@ -15,15 +15,12 @@ class PorterStemmer():
             "sky" : ["skies", "sky"],
             "lie" : ["lying"],
             "tie" : ["tying"],
-            "idl" : ["idly"],
-            "gentl" : ["gently"],
-            "ugli" : ["ugly"],
-            "earli" : ["early"],
-            "only" : ["onli"],
-            "singl" : ["singly"]
+            "inning" : ["innings", "inning"],
+            "outing" : ["outing", "outings"],
+            "canning" : ["canning", "cannings"]
         }
 
-        self.INVARIANT_FORMS = {"sky", "news", "howe", "atlas", "cosmos", "bias", "andes"}
+        self.INVARIANT_FORMS = {"sky", "news", "howe", "atlas", "cosmos", "bias", "andes", "proceed", "succeed", "exceed"}
 
     def _is_consonant(self, c: str):
         if len(c) != 1:
