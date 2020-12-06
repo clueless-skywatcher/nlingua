@@ -1,0 +1,2 @@
+class StemmerException(Exception):
+    pass

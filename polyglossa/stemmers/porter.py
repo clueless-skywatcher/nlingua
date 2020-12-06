@@ -1,7 +1,7 @@
-class StemmerException(Exception):
-    pass
+from polyglossa.stemmers.base import BaseStemmer
+from polyglossa.stemmers import StemmerException
 
-class PorterStemmer():
+class PorterStemmer(BaseStemmer):
     '''
     Stemmer designed by Martin Porter in his paper.
     Reference: https://tartarus.org/martin/PorterStemmer/def.txt
@@ -19,8 +19,7 @@ class PorterStemmer():
             "outing" : ["outing", "outings"],
             "canning" : ["canning", "cannings"]
         }
-
-        self.INVARIANT_FORMS = {"sky", "news", "howe", "atlas", "cosmos", "bias", "andes", "proceed", "succeed", "exceed"}
+        self.INVARIANT_FORMS = {"news", "howe", "proceed", "exceed", "succeed"}
 
     def _is_consonant(self, c: str):
         if len(c) != 1:
@@ -38,14 +37,6 @@ class PorterStemmer():
                 return True
         return False
 
-    def _ends_with(self, s: str, ends: str):
-        return s[-len(ends):] == ends
-
-    def _replace_suffix(self, s: str, ends_with: str, rep_with: str):
-        if self._ends_with(s, ends_with):
-            s = s[:-len(ends_with)] + rep_with
-        return s
-
     def _has_double_consonant(self, s: str):
         if len(s) > 2:
             return self._is_consonant(s[-1]) and self._is_consonant(s[-2])
@@ -59,19 +50,8 @@ class PorterStemmer():
         condition3 = not self._is_vowel_in_string(s, -1) and s[-1] not in ["w", "x", "y"]
         return all([condition1, condition2, condition3])
 
-    def _apply_rule(self, s, rule_list):
-        for rule in rule_list:
-            condition = rule[0]
-            suffix_check = rule[1]
-            suffix_replace = rule[2]
-            if condition is not None:
-                if all(condition) == True:
-                    s = self._replace_suffix(s, suffix_check, suffix_replace)
-                    break
-        return s
-
     def _step_1a(self, s: str):
-        self._apply_rule(s, rule_list=[
+        s = self._apply_rule(s, rule_list = [
             [None, "sses", "ss"],
             [None, "ies", "i"],
             [None, "ss", "ss"],
@@ -180,7 +160,7 @@ class PorterStemmer():
             [(self._stem_measure_and_ends_with(s, "ement", 1),), "ement", ""],
             [(self._stem_measure_and_ends_with(s, "ment", 1),), "ment", ""],
             [(self._stem_measure_and_ends_with(s, "ent", 1),), "ent", ""],
-            [(self._stem_measure_and_ends_with(s, "ion", 1), (self._ends_with(s, "s"), self._ends_with(s, "t"))), "ion", ""],
+            [(self._stem_measure_and_ends_with(s, "ion", 1), (self._ends_with(s[:-3], "s") or self._ends_with(s[:-3], "t"))), "ion", ""],
             [(self._stem_measure_and_ends_with(s, "ou", 1),), "ou", ""],
             [(self._stem_measure_and_ends_with(s, "ism", 1),), "ism", ""],
             [(self._stem_measure_and_ends_with(s, "ate", 1),), "ate", ""],
@@ -193,10 +173,12 @@ class PorterStemmer():
         return s
 
     def _step_5a(self, s):
-        s = self._apply_rule(s, rule_list = [
-            [(self._stem_measure_and_ends_with(s, "e", 1),), "e", ""],
-            [(self._stem_measure_and_ends_with(s, "e", 1, True), not self._check_cvc(s[:-1])), "e", ""]
-        ])
+        if self._ends_with(s, "e"):
+            stem = self._replace_suffix(s, "e", "")
+            if self._measure_count(stem) > 1:
+                return stem
+            if self._measure_count(stem) == 1 and not self._check_cvc(stem):
+                return stem
         return s
 
     def _step_5b(self, s):
@@ -210,12 +192,15 @@ class PorterStemmer():
             raise StemmerException("Cannot stem multiple words")
         s = word.lower()
 
-        for x in self.IRREGULAR_FORMS:
-            if s in self.IRREGULAR_FORMS[x]:
-                return x
+        if len(s) <= 2:
+            return s
 
         if s in self.INVARIANT_FORMS:
             return s
+
+        for x in self.IRREGULAR_FORMS:
+            if s in self.IRREGULAR_FORMS[x]:
+                return x
 
         s = self._step_1a(s)
         s = self._step_1b(s)

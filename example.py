@@ -1,8 +1,9 @@
 from polyglossa.stemmers.porter import PorterStemmer
-from nltk import stem
+from nltk.stem import porter
 
 if __name__ == '__main__':
     l = [
+        "caresses",
         "relational",
         "conditional",
         "rational",
@@ -62,17 +63,20 @@ if __name__ == '__main__':
         "dying",
         "atlas",
         "sky",
-        "cosmos"
+        "cosmos",
+        "potatoes",
+        "tomatoes",
+        "grandayy",
+        "ponies",
+        "flies"
     ]
 
     stemmer = PorterStemmer()
-    stemmer2 = stem.PorterStemmer()
-
+    stemmer2 = porter.PorterStemmer()
     errors = 0
 
     for x in l:
         if stemmer.stem(x) != stemmer2.stem(x):
             errors += 1
             print(stemmer.stem(x), stemmer2.stem(x))
-
-    print(stemmer.stem("lying"))
+    print(errors)
