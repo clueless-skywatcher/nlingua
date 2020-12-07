@@ -22,3 +22,9 @@ class BaseStemmer():
 
     def stem(self, s):
         pass
+
+    def stem_sentence(self, sentence: str, use_tokenizer: bool = False):
+        words = sentence.split(" ")
+        for i in range(len(words)):
+            words[i] = self.stem(words[i])
+        return " ".join(words)

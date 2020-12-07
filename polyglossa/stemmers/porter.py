@@ -217,9 +217,3 @@ class PorterStemmer(BaseStemmer):
         s = self._step_5b(s)
 
         return s
-
-    def stem_sentence(self, sentence: str, use_tokenizer: bool = False):
-        words = sentence.split(" ")
-        for i in range(len(words)):
-            words[i] = self.stem(words[i])
-        return " ".join(words)
