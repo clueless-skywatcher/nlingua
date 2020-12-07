@@ -68,15 +68,26 @@ if __name__ == '__main__':
         "tomatoes",
         "grandayy",
         "ponies",
-        "flies"
+        "flies",
+        "dance",
+        "eyes",
+        "dancing",
+        "enabling",
+        "eye"
     ]
 
     stemmer = PorterStemmer()
     stemmer2 = porter.PorterStemmer()
     errors = 0
 
-    for x in l:
+    l2 = [
+        "eyes",
+        "dancing",
+        "enabling",
+        "eye"
+    ]
+
+    for x in l2:
         if stemmer.stem(x) != stemmer2.stem(x):
             errors += 1
-            print(stemmer.stem(x), stemmer2.stem(x))
     print(errors)

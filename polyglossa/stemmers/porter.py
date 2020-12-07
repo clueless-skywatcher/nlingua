@@ -1,5 +1,6 @@
 from polyglossa.stemmers.base import BaseStemmer
 from polyglossa.stemmers import StemmerException
+from copy import copy
 
 class PorterStemmer(BaseStemmer):
     '''
@@ -39,12 +40,20 @@ class PorterStemmer(BaseStemmer):
 
     def _has_double_consonant(self, s: str):
         if len(s) > 2:
-            return self._is_consonant(s[-1]) and self._is_consonant(s[-2])
+            return (
+                self._is_consonant(s[-1])
+                and self._is_consonant(s[-2])
+                and s[-1] == s[-2]
+            )
         return False
 
     def _check_cvc(self, s: str):
         if len(s) < 3:
-            return False
+            return (
+                self._is_vowel_in_string(s, 0)
+                and not self._is_vowel_in_string(s, 1)
+                and len(s) == 2
+            )
         condition1 = not self._is_vowel_in_string(s, -3)
         condition2 = self._is_vowel_in_string(s, -2)
         condition3 = not self._is_vowel_in_string(s, -1) and s[-1] not in ["w", "x", "y"]
@@ -79,7 +88,6 @@ class PorterStemmer(BaseStemmer):
             s = self._replace_suffix(s, s[-2:], s[-1])
         elif self._measure_count(s) == 1 and self._check_cvc(s):
             s += "e"
-
         return s
 
     def _stem_measure_and_ends_with(self, s: str, suffix: str, min_m: int = 0, min_m_equal = False):
@@ -131,7 +139,6 @@ class PorterStemmer(BaseStemmer):
             [(self._stem_measure_and_ends_with(s, "iviti"),), "iviti", "ive"],
             [(self._stem_measure_and_ends_with(s, "biliti"),), "biliti", "ble"],
         ])
-
         return s
 
     def _step_3(self, s):
@@ -144,7 +151,6 @@ class PorterStemmer(BaseStemmer):
             [(self._stem_measure_and_ends_with(s, "ful"),), "ful", ""],
             [(self._stem_measure_and_ends_with(s, "ness"),), "ness", ""],
         ])
-
         return s
 
     def _step_4(self, s):
@@ -169,7 +175,6 @@ class PorterStemmer(BaseStemmer):
             [(self._stem_measure_and_ends_with(s, "ive", 1),), "ive", ""],
             [(self._stem_measure_and_ends_with(s, "ize", 1),), "ize", ""],
         ])
-
         return s
 
     def _step_5a(self, s):
@@ -212,3 +217,9 @@ class PorterStemmer(BaseStemmer):
         s = self._step_5b(s)
 
         return s
+
+    def stem_sentence(self, sentence: str, use_tokenizer: bool = False):
+        words = sentence.split(" ")
+        for i in range(len(words)):
+            words[i] = self.stem(words[i])
+        return " ".join(words)
