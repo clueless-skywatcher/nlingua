@@ -1,98 +1,84 @@
 from polyglossa.stemmers.porter import PorterStemmer
+from polyglossa.stemmers.snowball import SnowballStemmer
 from nltk.stem import porter
+from nltk.stem.snowball import EnglishStemmer
 
-if __name__ == '__main__':
-    l = [
-        "caresses",
-        "relational",
-        "conditional",
-        "rational",
-        "valenci",
-        "hesitanci",
-        "digitizer",
-        "conformabli",
-        "radicalli",
-        "differentli",
-        "vileli",
-        "analogousli",
-        "vietnamization",
-        "predication",
-        "operator",
-        "feudalism",
-        "decisiveness",
-        "hopefulness",
-        "callousness",
-        "formaliti",
-        "sensitiviti",
-        "sensibiliti",
-        "nationalism",
-        "triplicate",
-        "formative",
-        "formalize",
-        "electriciti",
-        "electrical",
-        "hopeful",
-        "goodness",
-        "revival",
-        "allowance",
-        "inference",
-        "airliner",
-        "gyroscopic",
-        "adjustable",
-        "defensible",
-        "irritant",
-        "replacement",
-        "adjustment",
-        "dependent",
-        "adoption",
-        "homologou",
-        "communism",
-        "activate",
-        "angulariti",
-        "homologous",
-        "effective",
-        "bowdlerize",
-        "probate",
-        "rate",
-        "cease",
-        "controll",
-        "roll",
-        "die",
-        "skies",
-        "lying",
-        "dying",
-        "atlas",
-        "sky",
-        "cosmos",
-        "potatoes",
-        "tomatoes",
-        "grandayy",
-        "ponies",
-        "flies",
-        "dance",
-        "eyes",
-        "dancing",
-        "enabling",
-        "eye"
-    ]
-
-    stemmer = PorterStemmer()
-    stemmer2 = porter.PorterStemmer()
-    errors = 0
+if __name__ == "__main__":
+    snw = SnowballStemmer()
+    snw2 = EnglishStemmer()
 
     l2 = [
-        "eyes",
-        "dancing",
-        "enabling",
-        "eye",
-        "insidious",
-        "jumping",
-        "jump",
-        "jumped"
+        "bed",
+        "shred",
+        "shed",
+        "bead",
+        "embed",
+        "beds"
     ]
 
-    for x in l2:
-        if stemmer.stem(x) != stemmer2.stem(x):
-            errors += 1
-        print(stemmer.stem(x), stemmer2.stem(x))
-    print(errors)
+    l3 = [
+        "ties",
+        "cries",
+        "gas",
+        "this",
+        "gaps",
+        "kiwis",
+        "lasses",
+        "curried",
+        "melodious",
+        "ass"
+    ]
+
+    l4 = [
+        "agreed",
+        "disagreedly",
+        "guaranteed",
+        "luxuriated",
+        "hopping",
+        "hoped",
+        "hurriedly"
+    ]
+
+    l5 = [
+        "cry",
+        "by",
+        "say",
+        "bY",
+        "crY",
+        "warranty"
+    ]
+
+    l6 = [
+        "emotional",
+        "excellency",
+        "reluctancy",
+        "remarkably",
+        "intelligently",
+        "energizer",
+        "latinization",
+        "elevational",
+        "generation",
+        "operator",
+        "nationalism",
+        "criticality",
+        "finally",
+        "forgetfulness",
+        "seriously",
+        "obnoxiousness",
+        "responsiveness",
+        "positivity",
+        "responsibility",
+        "possibly",
+        "homology",
+        "gleefully",
+        "carelessly",
+        "exactly",
+        "generate",
+        "general",
+        "generic"
+    ]
+    for x in l6:
+        s1 = snw.stem(x)
+        s2 = snw2.stem(x)
+        if s1 != s2:
+            print(s1, s2)
