@@ -84,10 +84,15 @@ if __name__ == '__main__':
         "eyes",
         "dancing",
         "enabling",
-        "eye"
+        "eye",
+        "insidious",
+        "jumping",
+        "jump",
+        "jumped"
     ]
 
     for x in l2:
         if stemmer.stem(x) != stemmer2.stem(x):
             errors += 1
+        print(stemmer.stem(x), stemmer2.stem(x))
     print(errors)
