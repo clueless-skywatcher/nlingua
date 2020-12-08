@@ -1,10 +1,33 @@
 from polyglossa.stemmers.base import BaseStemmer
 
 class SnowballStemmer(BaseStemmer):
+    def __init__(self, language = 'en'):
+        self.language = language
+
+class EnglishStemmer(SnowballStemmer):
     def __init__(self):
+        super().__init__(language = 'en')
         self.VOWELS = "aeiouy"
         self.DOUBLES = {"bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt"}
         self.LI_ENDINGS = {'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't'}
+
+        self.EXCEPTION_1 = {
+            "ski" : ["skis"],
+            "sky" : ["skies"],
+            "die" : ["dying"],
+            "lie" : ["lying"],
+            "tie" : ["tying"],
+            "idl" : ["idly"],
+            "earli" : ["early"],
+            "onli" : ["only"],
+            "singl" : ["singly"]
+        }
+
+        self.EXCEPTION_2 = {"inning", "canning", "herring", "exceed", "succeed", "proceed", "outing"}
+
+        self.INVARIANT_FORMS = {"sky", "atlas", "howe", "news", "bias", "andes"}
+
+        self.SPECIAL_P1_PREFIXES = {"gener", "commun", "arsen"}
 
     def _is_consonant(self, c):
         return not c in self.VOWELS
@@ -98,6 +121,11 @@ class SnowballStemmer(BaseStemmer):
     def _step_1b(self, s):
         r1, r2 = self._r1_r2(s)
 
+        for x in self.SPECIAL_P1_PREFIXES:
+            if s.startswith(x):
+                r1 = s[len(x):]
+                break
+
         suffixes = ["eed", "eedly", "ee", "ed", "edly", "ing", "ingly"]
         longest_suffix = self._find_longest_suffix_of(s, suffixes)
         if longest_suffix in {"eed", "eedly"}:
@@ -135,34 +163,34 @@ class SnowballStemmer(BaseStemmer):
         ]
 
         longest_suffix = self._find_longest_suffix_of(s, suffixes)
-
-        if longest_suffix in r1:
-            s = self._apply_rule(s, [
-                [(longest_suffix == "tional",), "tional", "tion"],
-                [(longest_suffix == "enci",), "enci", "ence"],
-                [(longest_suffix == "anci",), "anci", "ance"],
-                [(longest_suffix == "abli",), "abli", "able"],
-                [(longest_suffix == "entli",), "entli", "ent"],
-                [(longest_suffix == "izer",), "izer", "ize"],
-                [(longest_suffix == "ization",), "ization", "ize"],
-                [(longest_suffix == "ational",), "ational", "ate"],
-                [(longest_suffix == "ation",), "ation", "ate"],
-                [(longest_suffix == "ator",), "ator", "ate"],
-                [(longest_suffix == "alism",), "alism", "al"],
-                [(longest_suffix == "aliti",), "aliti", "al"],
-                [(longest_suffix == "alli",), "alli", "al"],
-                [(longest_suffix == "fulness",), "fulness", "ful"],
-                [(longest_suffix == "ousli",), "ousli", "ous"],
-                [(longest_suffix == "ousness",), "ousness", "ous"],
-                [(longest_suffix == "iveness",), "iveness", "ive"],
-                [(longest_suffix == "iviti",), "iviti", "ive"],
-                [(longest_suffix == "biliti",), "biliti", "ble"],
-                [(longest_suffix == "bli",), "bli", "ble"],
-                [(longest_suffix == "ogi", self._preceding_part(s, "ogi")[-1] == "l"), "ogi", "og"],
-                [(longest_suffix == "fulli",), "fulli", "ful"],
-                [(longest_suffix == "lessli",), "lessli", "less"],
-                [(longest_suffix == "li", any([self._ends_with(self._preceding_part(s, "li"), x) for x in self.LI_ENDINGS])), "li", ""],
-            ])
+        if r1 is not None:
+            if longest_suffix in r1:
+                s = self._apply_rule(s, [
+                    [(longest_suffix == "tional",), "tional", "tion"],
+                    [(longest_suffix == "enci",), "enci", "ence"],
+                    [(longest_suffix == "anci",), "anci", "ance"],
+                    [(longest_suffix == "abli",), "abli", "able"],
+                    [(longest_suffix == "entli",), "entli", "ent"],
+                    [(longest_suffix == "izer",), "izer", "ize"],
+                    [(longest_suffix == "ization",), "ization", "ize"],
+                    [(longest_suffix == "ational",), "ational", "ate"],
+                    [(longest_suffix == "ation",), "ation", "ate"],
+                    [(longest_suffix == "ator",), "ator", "ate"],
+                    [(longest_suffix == "alism",), "alism", "al"],
+                    [(longest_suffix == "aliti",), "aliti", "al"],
+                    [(longest_suffix == "alli",), "alli", "al"],
+                    [(longest_suffix == "fulness",), "fulness", "ful"],
+                    [(longest_suffix == "ousli",), "ousli", "ous"],
+                    [(longest_suffix == "ousness",), "ousness", "ous"],
+                    [(longest_suffix == "iveness",), "iveness", "ive"],
+                    [(longest_suffix == "iviti",), "iviti", "ive"],
+                    [(longest_suffix == "biliti",), "biliti", "ble"],
+                    [(longest_suffix == "bli",), "bli", "ble"],
+                    [(longest_suffix == "ogi", self._preceding_part(s, "ogi")[-1] == "l"), "ogi", "og"],
+                    [(longest_suffix == "fulli",), "fulli", "ful"],
+                    [(longest_suffix == "lessli",), "lessli", "less"],
+                    [(longest_suffix == "li", any([self._ends_with(self._preceding_part(s, "li"), x) for x in self.LI_ENDINGS])), "li", ""],
+                ])
 
         return s
 
@@ -177,21 +205,23 @@ class SnowballStemmer(BaseStemmer):
         ]
 
         longest_suffix = self._find_longest_suffix_of(s, suffixes)
-        if longest_suffix in r1:
-            s = self._apply_rule(s, rule_list = [
-                [(longest_suffix == "tional",), "tional", "tion"],
-                [(longest_suffix == "ational",), "ational", "ate"],
-                [(longest_suffix == "alize",), "alize", "al"],
-                [(longest_suffix == "icate",), "icate", "ic"],
-                [(longest_suffix == "iciti",), "iciti", "ic"],
-                [(longest_suffix == "ical",), "ical", "ic"],
-                [(longest_suffix == "ful",), "ful", ""],
-                [(longest_suffix == "ness",), "ness", ""],
-            ])
-            if r2 is not None:
+
+        if r1 is not None:
+            if longest_suffix in r1:
                 s = self._apply_rule(s, rule_list = [
-                    [(longest_suffix == "ative", longest_suffix in r2), "ative", ""]
+                    [(longest_suffix == "tional",), "tional", "tion"],
+                    [(longest_suffix == "ational",), "ational", "ate"],
+                    [(longest_suffix == "alize",), "alize", "al"],
+                    [(longest_suffix == "icate",), "icate", "ic"],
+                    [(longest_suffix == "iciti",), "iciti", "ic"],
+                    [(longest_suffix == "ical",), "ical", "ic"],
+                    [(longest_suffix == "ful",), "ful", ""],
+                    [(longest_suffix == "ness",), "ness", ""],
                 ])
+                if r2 is not None:
+                    s = self._apply_rule(s, rule_list = [
+                        [(longest_suffix == "ative", longest_suffix in r2), "ative", ""]
+                    ])
 
         return s
 
@@ -230,8 +260,19 @@ class SnowballStemmer(BaseStemmer):
             return s
         s = s.lower()
 
+        if s in self.INVARIANT_FORMS:
+            return s
+
+        for x in self.EXCEPTION_1:
+            if s in self.EXCEPTION_1[x]:
+                return x
+
         s = self._step_0(s)
+
         s = self._step_1a(s)
+        if s in self.EXCEPTION_2:
+            return s
+
         s = self._step_1b(s)
         s = self._step_1c(s)
         s = self._step_2(s)
