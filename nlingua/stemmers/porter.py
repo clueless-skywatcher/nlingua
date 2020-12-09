@@ -1,5 +1,5 @@
-from polyglossa.stemmers.base import BaseStemmer
-from polyglossa.stemmers import StemmerException
+from nlingua.stemmers.base import BaseStemmer
+from nlingua.stemmers import StemmerException
 from copy import copy
 
 class PorterStemmer(BaseStemmer):

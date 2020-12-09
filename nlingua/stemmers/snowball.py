@@ -1,4 +1,4 @@
-from polyglossa.stemmers.base import BaseStemmer
+from nlingua.stemmers.base import BaseStemmer
 
 class SnowballStemmer(BaseStemmer):
     def __init__(self, language = 'en'):

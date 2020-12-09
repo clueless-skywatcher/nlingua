@@ -1,4 +1,4 @@
-from polyglossa.stemmers.snowball import EnglishStemmer
+from nlingua.stemmers.snowball import EnglishStemmer
 
 if __name__ == "__main__":
     snw = EnglishStemmer()
