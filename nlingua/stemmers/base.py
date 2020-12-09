@@ -7,6 +7,9 @@ class BaseStemmer():
             s = s[:-len(ends_with)] + rep_with
         return s
 
+    def _replace_char(self, s, rep, pos):
+        return s[:pos] + rep + s[pos + 1:]
+
     def _apply_rule(self, s, rule_list):
         for rule in rule_list:
             condition = rule[0]

@@ -1,4 +1,5 @@
 from nlingua.stemmers.base import BaseStemmer
+from nlingua.constants import ENGLISH_STOPWORDS, GERMAN_STOPWORDS
 
 class SnowballStemmer(BaseStemmer):
     def __init__(self, language = 'en'):
@@ -46,7 +47,7 @@ class EnglishStemmer(SnowballStemmer):
         super().__init__(language = 'en')
         self.VOWELS = "aeiouy"
         self.DOUBLES = {"bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt"}
-        self.LI_ENDINGS = {'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't'}
+        self.LI_ENDINGS = "cdeghkmnrt"
 
         self.EXCEPTION_1 = {
             "ski" : ["skis"],
@@ -71,7 +72,7 @@ class EnglishStemmer(SnowballStemmer):
             self._is_consonant(s[len(s) - 3])
             and self._is_vowel(s[len(s) - 2])
             and self._is_consonant(s[len(s) - 1])
-            and s[len(s) - 1] not in {"w", "x", "Y"}
+            and s[len(s) - 1] not in "wxY"
             and self._r1(s) == None
         ):
             return True
@@ -88,7 +89,7 @@ class EnglishStemmer(SnowballStemmer):
             and max(i, -i) < len(s)
             and not self._is_vowel(s[i - 1])
             and not self._is_vowel(s[i + 1])
-            and s[i + 1] not in ("w", "x", "Y")
+            and s[i + 1] not in "wxY"
         )
 
     def _remove_init_apos(self, s):
@@ -258,9 +259,9 @@ class EnglishStemmer(SnowballStemmer):
         return s
 
     def stem(self, s):
-        if len(s) <= 2:
-            return s
         s = s.lower()
+        if len(s) <= 2 or s in ENGLISH_STOPWORDS:
+            return s
 
         if s in self.INVARIANT_FORMS:
             return s
@@ -283,3 +284,140 @@ class EnglishStemmer(SnowballStemmer):
         s = self._step_5(s)
 
         return s.lower()
+
+class GermanStemmer(SnowballStemmer):
+    def __init__(self):
+        super().__init__(language = 'de')
+        self.VOWELS = "aeiouy\xE4\xF6\xFC"
+        self.S_ENDINGS = "bdfghklmnrt"
+        self.ST_ENDINGS = self.S_ENDINGS.replace("r", "")
+        self.UMLAUT_DICT = {
+            "ä" : "a",
+            "ö" : "o",
+            "ü" : "u"
+        }
+        self.ESZETT = "\xDF"
+
+    def _replace_ss(self, s):
+        i = 0
+        while i < len(s):
+            if s[i] == self.ESZETT:
+                s = self._replace_char(s, "ss", i)
+            i += 1
+        return s
+
+    def _change_uy(self, s):
+        for i in range(1, len(s) - 1):
+            if s[i] in {"u", "y"} and self._is_vowel(s[i - 1]) and self._is_vowel(s[i + 1]):
+                s = self._replace_char(s, s[i].upper(), i)
+        return s
+
+    def _german_r1(self, s):
+        r1 = self._r1(s)
+        if r1 is None:
+            return r1
+        for i in range(1, len(s)):
+            if self._is_vowel(s[i - 1]) and self._is_consonant(s[i]):
+                if 0 < len(s[: i + 1]) < 3:
+                    r1 = s[3:]
+                elif len(s[: i + 1]) == 0:
+                    return s
+                break
+        return r1
+
+    def _step_1(self, s):
+        r1 = self._german_r1(s)
+
+        suffixes = {"em", "ern", "er", "e", "en", "es", "s"}
+        longest_suffix = self._find_longest_suffix_of(s, suffixes)
+
+        if r1 is not None:
+            if longest_suffix in {"em", "ern", "er"} and longest_suffix in r1:
+                s = self._replace_suffix(s, longest_suffix, "")
+            elif longest_suffix in {"e", "en", "es"} and longest_suffix in r1:
+                s = self._replace_suffix(s, longest_suffix, "")
+                if self._ends_with(s, "niss"):
+                    s = s[:-1]
+            elif longest_suffix == "s" and longest_suffix in r1:
+                if s[-2] in self.S_ENDINGS:
+                    s = self._replace_suffix(s, longest_suffix, "")
+
+        return s
+
+    def _step_2(self, s):
+        suffixes = {"en", "er", "est", "st"}
+        r1 = self._german_r1(s)
+        longest_suffix = self._find_longest_suffix_of(s, suffixes)
+        if r1 is not None:
+            s = self._apply_rule(s, [
+                [(longest_suffix in {"en", "er", "est"}, longest_suffix in r1), longest_suffix, ""],
+                [(longest_suffix == "st",
+                  any([self._ends_with(s, x + longest_suffix) for x in self.ST_ENDINGS]),
+                  len(s[:-3]) >= 3,
+                  longest_suffix in r1), longest_suffix, ""]
+            ])
+
+        return s
+
+    def _step_3(self, s):
+        r1 = self._german_r1(s)
+        r2 = self._r2(s)
+
+        suffixes = {"end", "ung", "ig", "ik", "isch", "lich", "heit", "keit"}
+
+        longest_suffix = self._find_longest_suffix_of(s, suffixes)
+
+        if r1 is not None and r2 is not None:
+            if longest_suffix in {"end", "ung"} and longest_suffix in r2:
+                s = self._replace_suffix(s, longest_suffix, "")
+                s = self._apply_rule(s, [
+                    [(self._ends_with(s, "ig"),
+                      "ig" in r2,
+                      s[-3] != 'e'), "ig", ""]
+                ])
+            elif longest_suffix in {"ig", "ik", "isch"} and longest_suffix in r2:
+                s = self._apply_rule(s, [
+                    [(s[-len(longest_suffix) - 1] != "e",), longest_suffix, ""]
+                ])
+            elif longest_suffix in {"lich", "heit"} and longest_suffix in r2:
+                s = self._replace_suffix(s, longest_suffix, "")
+                preceding_suffix = s[-2:]
+                s = self._apply_rule(s, [
+                    [(preceding_suffix in {"er", "en"}, preceding_suffix in r1), preceding_suffix, ""]
+                ])
+            elif longest_suffix == "keit" and longest_suffix in r2:
+                s = self._replace_suffix(s, longest_suffix, "")
+                s = self._apply_rule(s, [
+                    [(self._ends_with(s, "lich"), "lich" in r2), "lich", ""],
+                    [(self._ends_with(s, "ig"), "ig" in r2), "ig", ""]
+                ])
+
+        return s
+
+    def _change_umlauts(self, s):
+        for i in range(len(s)):
+            if s[i] in self.UMLAUT_DICT.keys():
+                s = self._replace_char(s, self.UMLAUT_DICT[s[i]], i)
+        return s
+
+    def stem(self, s):
+        s = s.lower()
+        if len(s) <= 2 or len(s) in GERMAN_STOPWORDS:
+            s = self._change_umlauts(s)
+            s = self._replace_ss(s)
+            return s
+
+        s = self._replace_ss(s)
+        s = self._change_uy(s)
+
+        s = self._step_1(s)
+        s = self._step_2(s)
+        s = self._step_3(s)
+
+        s = s.lower()
+        s = self._change_umlauts(s)
+
+        return s
+
+
+
