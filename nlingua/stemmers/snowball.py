@@ -3,6 +3,43 @@ from nlingua.stemmers.base import BaseStemmer
 class SnowballStemmer(BaseStemmer):
     def __init__(self, language = 'en'):
         self.language = language
+        self.VOWELS = {}
+
+    def _find_longest_suffix_of(self, s, suffixes):
+        suffixes = sorted(suffixes, key = len, reverse = True)
+        for suffix in suffixes:
+            if self._ends_with(s, suffix):
+                return suffix
+        return ""
+
+    def _r1(self, s):
+        for i in range(len(s) - 2):
+            if self._is_vowel(s[i]) and self._is_consonant(s[i + 1]):
+                return s[i + 2:]
+        return None
+
+    def _r2(self, s):
+        r1 = self._r1(s)
+        return None if r1 == None else self._r1(r1)
+
+    def _r1_r2(self, s):
+        return self._r1(s), self._r2(s)
+
+    def _preceding_part(self, s, suffix):
+        return s[:-len(suffix)]
+
+    def _is_consonant(self, c):
+        return not c in self.VOWELS
+
+    def _is_vowel(self, c):
+        return not self._is_consonant(c)
+
+    def _has_vowel(self, s):
+        for c in s:
+            if c in self.VOWELS:
+                return True
+        return False
+
 
 class EnglishStemmer(SnowballStemmer):
     def __init__(self):
@@ -28,28 +65,6 @@ class EnglishStemmer(SnowballStemmer):
         self.INVARIANT_FORMS = {"sky", "atlas", "howe", "news", "bias", "andes"}
 
         self.SPECIAL_P1_PREFIXES = {"gener", "commun", "arsen"}
-
-    def _is_consonant(self, c):
-        return not c in self.VOWELS
-
-    def _is_vowel(self, c):
-        return not self._is_consonant(c)
-
-    def _has_vowel(self, s):
-        for c in s:
-            if c in self.VOWELS:
-                return True
-        return False
-
-    def _r1(self, s):
-        for i in range(len(s) - 2):
-            if self._is_vowel(s[i]) and self._is_consonant(s[i + 1]):
-                return s[i + 2:]
-        return None
-
-    def _r2(self, s):
-        r1 = self._r1(s)
-        return None if r1 == None else self._r1(r1)
 
     def _is_short(self, s):
         if (
@@ -88,19 +103,6 @@ class EnglishStemmer(SnowballStemmer):
             if self._is_vowel(s[i - 1]) and s[i] == 'y':
                 s = s[:i] + 'Y' + s[i + 1:]
         return s
-
-    def _find_longest_suffix_of(self, s, suffixes):
-        suffixes = sorted(suffixes, key = len, reverse = True)
-        for suffix in suffixes:
-            if self._ends_with(s, suffix):
-                return suffix
-        return ""
-
-    def _r1_r2(self, s):
-        return self._r1(s), self._r2(s)
-
-    def _preceding_part(self, s, suffix):
-        return s[:-len(suffix)]
 
     def _step_0(self, s):
         return self._replace_suffix(s, self._find_longest_suffix_of(s, ["\'", "\'s", "\'s\'"]), "")
