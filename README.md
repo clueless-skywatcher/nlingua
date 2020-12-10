@@ -3,10 +3,10 @@
 An NLP library in Python written from scratch; Inspired by NLTK.
 
 Features implemented:
-- Tokenizer:
+- Tokenizers (available in `nlingua.tokenizers`):
   - String tokenizer
-- Stemmer:
-  - Porter Stemmer for English (available in [nlingua.stemmers])
+- Stemmers (available in `nlingua.stemmers`):
+  - Porter Stemmer for English
   - Snowball Stemmers:
     - English
     - German
