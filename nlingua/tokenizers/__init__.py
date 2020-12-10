@@ -1,1 +1,1 @@
-from .string_tokenizer import *
+from .word_tokenizer import *
