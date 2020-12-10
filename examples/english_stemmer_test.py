@@ -1,4 +1,5 @@
-from nlingua.stemmers.snowball import EnglishStemmer
+from nlingua.stemmers import EnglishStemmer
+from nltk.stem.snowball import EnglishStemmer as NLTKEnglishStemmer
 
 if __name__ == "__main__":
     snw = EnglishStemmer()
@@ -176,3 +177,17 @@ if __name__ == "__main__":
         if s1 == y:
             correct += 1
     print(f"{correct}/{total} correct")
+
+    s1 = EnglishStemmer().stem_sentence("The quick brown fox jumped over the lazy dog")
+    from nlingua.tokenizers import StringTokenizer
+
+    stemmer = NLTKEnglishStemmer()
+    s2 = StringTokenizer().tokenize("The quick brown fox jumped over the lazy dog")
+
+    for i in range(len(s2)):
+        w = stemmer.stem(s2[i])
+        s2[i] = w
+
+    s2 = " ".join(s2)
+
+    print(s1 == s2)

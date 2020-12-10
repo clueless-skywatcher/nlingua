@@ -1,5 +1,5 @@
 from nlingua.stemmers.base import BaseStemmer
-from nlingua.stemmers import StemmerException
+from nlingua.stemmers.errors import StemmerException
 from copy import copy
 
 class PorterStemmer(BaseStemmer):
