@@ -7,6 +7,7 @@ setuptools.setup(
     name = "nlingua-clueless-skywatcher",
     version = "0.0.1",
     author = "clueless-skywatcher",
+    author_email = "somichat@gmail.com",
     description = "An NLP library in Python written from scratch; Inspired by NLTK",
     long_description = long_description,
     long_description_content_type = "text/markdown",
