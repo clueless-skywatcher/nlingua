@@ -42,7 +42,7 @@ class SnowballStemmer(BaseStemmer):
         return False
 
 
-class EnglishStemmer(SnowballStemmer):
+class EnglishSnowballStemmer(SnowballStemmer):
     def __init__(self):
         super().__init__(language = 'en')
         self.VOWELS = "aeiouy"
@@ -285,7 +285,7 @@ class EnglishStemmer(SnowballStemmer):
 
         return s.lower()
 
-class GermanStemmer(SnowballStemmer):
+class GermanSnowballStemmer(SnowballStemmer):
     def __init__(self):
         super().__init__(language = 'de')
         self.VOWELS = "aeiouy\xE4\xF6\xFC"

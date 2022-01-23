@@ -1,5 +1,5 @@
-from nlingua.stemmers import GermanStemmer
-from nltk.stem.snowball import GermanStemmer as NLTKGermanStemmer
+from nlingua.stemmers import GermanSnowballStemmer
+from nltk.stem.snowball import GermanStemmer
 import codecs
 
 if __name__ == '__main__':
@@ -10,8 +10,8 @@ if __name__ == '__main__':
     words = [x[:-1] for x in words]
 
     correct = 0
-    stemmer = GermanStemmer()
-    stemmer2 = NLTKGermanStemmer()
+    stemmer = GermanSnowballStemmer()
+    stemmer2 = GermanStemmer()
     for word in words:
         a = stemmer.stem(word)
         b = stemmer2.stem(word)
