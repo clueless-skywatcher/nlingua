@@ -6,7 +6,7 @@ class SimpleTagger(BaseTagger):
     word it receives.
 
     >>> from nlingua.taggers import SimpleTagger
-    >>> s = SimpleTagger("ADV")
+    >>> s = SimpleTagger("NN")
     >>> s.tag("This is a string".split(" "))
     [('This', 'NN'), ('is', 'NN'), ('a', 'NN'), ('string', 'NN')]
 
