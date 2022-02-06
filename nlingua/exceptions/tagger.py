@@ -1,0 +1,2 @@
+class TaggerException(Exception):
+    pass
