@@ -9,6 +9,8 @@ class SimpleTagger(BaseTagger):
     >>> s = SimpleTagger("NN")
     >>> s.tag("This is a string".split(" "))
     [('This', 'NN'), ('is', 'NN'), ('a', 'NN'), ('string', 'NN')]
+    >>> s.tag_sentences(["Hi bro wassup?".split(" "), "I am all good".split(" ")])
+    [[('Hi', 'NN'), ('bro', 'NN'), ('wassup?', 'NN')], [('I', 'NN'), ('am', 'NN'), ('all', 'NN'), ('good', 'NN')]]
 
     Params:
     tag: The tag that needs to be assigned
